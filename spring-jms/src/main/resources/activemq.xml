@@ -26,12 +26,19 @@
                            userName="admin"
                            password="admin" />
 
-    <!-- 配置JMS连接工厂 -->
+    <!-- ActiveMQ 连接工厂 -->
+    <!-- 真正可以产生Connection的ConnectionFactory，由对应的 JMS服务厂商提供-->
+    <!-- 如果连接网络：tcp://ip:61616；未连接网络：tcp://localhost:61616 以及用户名，密码-->
     <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <!-- 目标ConnectionFactory对应真实的可以产生JMS Connection的ConnectionFactory -->
         <constructor-arg ref="amqConnectionFactory" />
+        <!-- 同上，同理 -->
+        <!-- <constructor-arg ref="amqConnectionFactory" /> -->
+        <!-- Session缓存数量 -->
         <property name="sessionCacheSize" value="100" />
     </bean>
 
+    <!-- 点对点消息的配置 begin -->
     <!-- 定义消息队列（Queue） -->
     <bean id="demoQueue" class="org.apache.activemq.command.ActiveMQQueue">
         <!-- 设置消息队列的名字 -->
@@ -41,7 +48,7 @@
     </bean>
 
     <!-- 配置JMS模板（Queue），Spring提供的JMS工具类，它发送、接收消息。 -->
-    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <bean id="jmsQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
         <property name="connectionFactory" ref="connectionFactory" />
         <property name="defaultDestination" ref="demoQueue" />
         <property name="receiveTimeout" value="10000" />
@@ -57,6 +64,38 @@
         <property name="connectionFactory" ref="connectionFactory" />
         <property name="destination" ref="demoQueue" />
         <property name="messageListener" ref="queueMessageListener" />
+        <property name="sessionTransacted" value="true"/>
     </bean>-->
+    <!-- 点对点消息的配置 end -->
 
+    <!-- 订阅、发布消息的配置 begin -->
+    <!-- 定义消息队列（topic） -->
+    <bean id="demoTopic" class="org.apache.activemq.command.ActiveMQTopic">
+        <!-- 设置消息队列的名字 -->
+        <constructor-arg>
+            <value>com.ding.topic.demo</value>
+        </constructor-arg>
+    </bean>
+
+    <!-- 定义JmsTemplate的Topic类型 -->
+    <bean id="jmsTopicTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
+        <constructor-arg ref="connectionFactory" />
+        <!-- pub/sub模型（发布/订阅） -->
+        <property name="pubSubDomain" value="true" />
+    </bean>
+
+    <!-- 配置消息队列监听者（topic） -->
+    <!--<bean id="topicMessageListener1" class="com.ding.springjms.listener.TopicMessageListener1" />-->
+    <!-- 配置消息队列监听者（topic） -->
+    <!--<bean id="topicMessageListener2" class="com.ding.springjms.listener.TopicMessageListener2" />-->
+
+    <!-- 显示注入消息监听容器（Queue），配置连接工厂，监听的目标是demoQueue，监听器是上面定义的监听器 -->
+    <!--<bean id="topicListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="destination" ref="demoTopic" />
+        <property name="messageListener" ref="topicMessageListener1" />
+        <property name="sessionTransacted" value="true"/>
+    </bean>-->
+    <!-- 订阅、发布消息的配置 end -->
 </beans>

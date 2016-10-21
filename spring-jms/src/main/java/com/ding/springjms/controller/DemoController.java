@@ -27,7 +27,7 @@ public class DemoController {
 
 
     //队列名gzframe.demo
-    @Resource(name = "demoQueueDestination")
+    @Resource(name = "demoQueue")
     private Destination demoQueueDestination;
 
     //队列消息生产者

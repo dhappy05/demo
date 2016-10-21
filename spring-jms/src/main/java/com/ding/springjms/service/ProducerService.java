@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProducerService {
 
-    @Resource(name = "jmsTemplate")
+    @Resource(name = "jmsQueueTemplate")
     private JmsTemplate jmsTemplate;
 
     /**
